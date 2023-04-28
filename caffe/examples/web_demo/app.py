@@ -1,6 +1,6 @@
 import os
 import time
-import cPickle
+import pickle
 import datetime
 import logging
 import flask
@@ -11,8 +11,8 @@ import tornado.httpserver
 import numpy as np
 import pandas as pd
 from PIL import Image
-import cStringIO as StringIO
-import urllib
+import io as StringIO
+import urllib.request, urllib.parse, urllib.error
 import exifutil
 
 import caffe
@@ -35,7 +35,7 @@ def classify_url():
     imageurl = flask.request.args.get('imageurl', '')
     try:
         string_buffer = StringIO.StringIO(
-            urllib.urlopen(imageurl).read())
+            urllib.request.urlopen(imageurl).read())
         image = caffe.io.load_image(string_buffer)
 
     except Exception as err:
@@ -109,7 +109,7 @@ class ImagenetClassifier(object):
         'bet_file': (
             '{}/data/ilsvrc12/imagenet.bet.pickle'.format(REPO_DIRNAME)),
     }
-    for key, val in default_args.iteritems():
+    for key, val in default_args.items():
         if not os.path.exists(val):
             raise Exception(
                 "File for {} is missing. Should be at: {}".format(key, val))
@@ -139,7 +139,7 @@ class ImagenetClassifier(object):
             ])
         self.labels = labels_df.sort('synset_id')['name'].values
 
-        self.bet = cPickle.load(open(bet_file))
+        self.bet = pickle.load(open(bet_file))
         # A bias to prefer children nodes in single-chain paths
         # I am setting the value to 0.1 as a quick, simple model.
         # We could use better psychological models here...
@@ -185,7 +185,7 @@ def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(
         tornado.wsgi.WSGIContainer(app))
     http_server.listen(port)
-    print("Tornado server starting on port {}".format(port))
+    print(("Tornado server starting on port {}".format(port)))
     tornado.ioloop.IOLoop.instance().start()
 
 

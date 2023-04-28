@@ -96,14 +96,14 @@ class ProposalTargetLayer(caffe.Layer):
             assert relations is not None
 
         if DEBUG:
-            print 'num fg: {}'.format((labels > 0).sum())
-            print 'num bg: {}'.format((labels == 0).sum())
+            print('num fg: {}'.format((labels > 0).sum()))
+            print('num bg: {}'.format((labels == 0).sum()))
             self._count += 1
             self._fg_num += (labels > 0).sum()
             self._bg_num += (labels == 0).sum()
-            print 'num fg avg: {}'.format(self._fg_num / self._count)
-            print 'num bg avg: {}'.format(self._bg_num / self._count)
-            print 'ratio: {:.3f}'.format(float(self._fg_num) / float(self._bg_num))
+            print('num fg avg: {}'.format(self._fg_num / self._count))
+            print('num bg avg: {}'.format(self._bg_num / self._count))
+            print('ratio: {:.3f}'.format(float(self._fg_num) / float(self._bg_num)))
 
         # sampled rois
         # modified by ywxiong
@@ -150,7 +150,7 @@ class ProposalTargetLayer(caffe.Layer):
             
         if DEBUG_SHAPE:
             for i in range(len(top)):
-                print 'ProposalTargetLayer top[{}] size: {}'.format(i, top[i].data.shape)
+                print('ProposalTargetLayer top[{}] size: {}'.format(i, top[i].data.shape))
 
     def backward(self, top, propagate_down, bottom):
         """This layer does not propagate gradients."""

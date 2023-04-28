@@ -5,7 +5,7 @@ interface.
 
 from collections import OrderedDict
 try:
-    from itertools import izip_longest
+    from itertools import zip_longest
 except:
     from itertools import zip_longest as izip_longest
 import numpy as np
@@ -28,7 +28,7 @@ def _Net_blobs(self):
     blobs indexed by name
     """
     if not hasattr(self, '_blobs_dict'):
-        self._blobs_dict = OrderedDict(zip(self._blob_names, self._blobs))
+        self._blobs_dict = OrderedDict(list(zip(self._blob_names, self._blobs)))
     return self._blobs_dict
 
 
@@ -39,8 +39,8 @@ def _Net_blob_loss_weights(self):
     blob loss weights indexed by name
     """
     if not hasattr(self, '_blobs_loss_weights_dict'):
-        self._blob_loss_weights_dict = OrderedDict(zip(self._blob_names,
-                                                       self._blob_loss_weights))
+        self._blob_loss_weights_dict = OrderedDict(list(zip(self._blob_names,
+                                                       self._blob_loss_weights)))
     return self._blob_loss_weights_dict
 
 
@@ -228,7 +228,7 @@ def _Net_forward_backward_all(self, blobs=None, diffs=None, **kwargs):
     backward_batches = self._batch({out: kwargs[out]
                                     for out in self.outputs if out in kwargs})
     # Collect outputs from batches (and heed lack of forward/backward batches).
-    for fb, bb in izip_longest(forward_batches, backward_batches, fillvalue={}):
+    for fb, bb in zip_longest(forward_batches, backward_batches, fillvalue={}):
         batch_blobs = self.forward(blobs=blobs, **fb)
         batch_diffs = self.backward(diffs=diffs, **bb)
         for out, out_blobs in six.iteritems(batch_blobs):

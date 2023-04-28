@@ -49,8 +49,8 @@ class TestNet(unittest.TestCase):
     def test_memory(self):
         """Check that holding onto blob data beyond the life of a Net is OK"""
 
-        params = sum(map(list, six.itervalues(self.net.params)), [])
-        blobs = self.net.blobs.values()
+        params = sum(list(map(list, six.itervalues(self.net.params))), [])
+        blobs = list(self.net.blobs.values())
         del self.net
 
         # now sum everything (forcing all memory to be read)
@@ -181,7 +181,7 @@ layer {
         os.remove(self.f.name)
 
     def check_net(self, net, blobs):
-        net_blobs = [b for b in net.blobs.keys() if 'data' not in b]
+        net_blobs = [b for b in list(net.blobs.keys()) if 'data' not in b]
         self.assertEqual(net_blobs, blobs)
 
     def test_0(self):
@@ -246,7 +246,7 @@ layer {
         os.remove(self.f.name)
 
     def check_net(self, net, blobs):
-        net_blobs = [b for b in net.blobs.keys() if 'data' not in b]
+        net_blobs = [b for b in list(net.blobs.keys()) if 'data' not in b]
         self.assertEqual(net_blobs, blobs)
 
     def test_A(self):

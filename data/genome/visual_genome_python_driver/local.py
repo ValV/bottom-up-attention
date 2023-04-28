@@ -1,8 +1,8 @@
-from models import Image, Object, Attribute, Relationship
-from models import Region, Graph, QA, QAObject, Synset
-import httplib
+from .models import Image, Object, Attribute, Relationship
+from .models import Region, Graph, QA, QAObject, Synset
+import http.client
 import json
-import utils
+from . import utils
 import os, gc
 
 """
@@ -162,7 +162,7 @@ def ParseGraphLocal(data, image, verbose=False):
       else:
         count_skips[1] += 1
   if verbose:
-    print 'Skipped {} rels, {} attrs total'.format(*count_skips)
+    print('Skipped {} rels, {} attrs total'.format(*count_skips))
   return Graph(image, objects, relationships, attributes)
 
 """
@@ -239,7 +239,7 @@ def AddAttrsToSceneGraphs(dataDir='data/visualgenome/'):
     sg_dict[iid]['attributes'] = attrs
 
   with open(os.path.join(dataDir, 'scene_graphs.json'), 'w') as f:
-    json.dump(sg_dict.values(), f)
+    json.dump(list(sg_dict.values()), f)
   del attr_data, sg_dict
   gc.collect()
 

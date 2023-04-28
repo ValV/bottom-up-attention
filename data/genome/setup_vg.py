@@ -95,15 +95,15 @@ def build_vocabs_and_xml():
       attributes.update(a)
   
   with open(os.path.join(outDir, "objects_count.txt"), "w") as text_file:
-    for k,v in sorted(objects.iteritems(), key=operator.itemgetter(1), reverse=True):
+    for k,v in sorted(iter(objects.items()), key=operator.itemgetter(1), reverse=True):
       text_file.write("%s\t%d\n" % (k.encode('utf-8'),v))
       
   with open(os.path.join(outDir, "attributes_count.txt"), "w") as text_file:
-    for k,v in sorted(attributes.iteritems(), key=operator.itemgetter(1), reverse=True):
+    for k,v in sorted(iter(attributes.items()), key=operator.itemgetter(1), reverse=True):
       text_file.write("%s\t%d\n" % (k.encode('utf-8'),v))
       
   with open(os.path.join(outDir, "relations_count.txt"), "w") as text_file:
-    for k,v in sorted(relations.iteritems(), key=operator.itemgetter(1), reverse=True):
+    for k,v in sorted(iter(relations.items()), key=operator.itemgetter(1), reverse=True):
       text_file.write("%s\t%d\n" % (k.encode('utf-8'),v))
 
   # Create full-sized vocabs

@@ -4,7 +4,7 @@ Form a subset of the Flickr Style data, download images to dirname, and write
 Caffe ImagesDataLayer training file.
 """
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import argparse
 import numpy as np
@@ -25,7 +25,7 @@ def download_image(args_tuple):
     try:
         url, filename = args_tuple
         if not os.path.exists(filename):
-            urllib.urlretrieve(url, filename)
+            urllib.request.urlretrieve(url, filename)
         with open(filename) as f:
             assert hashlib.sha1(f.read()).hexdigest() != MISSING_IMAGE_SHA1
         test_read_image = io.imread(filename)
@@ -81,10 +81,10 @@ if __name__ == '__main__':
     num_workers = args.workers
     if num_workers <= 0:
         num_workers = multiprocessing.cpu_count() + num_workers
-    print('Downloading {} images with {} workers...'.format(
-        df.shape[0], num_workers))
+    print(('Downloading {} images with {} workers...'.format(
+        df.shape[0], num_workers)))
     pool = multiprocessing.Pool(processes=num_workers)
-    map_args = zip(df['image_url'], df['image_filename'])
+    map_args = list(zip(df['image_url'], df['image_filename']))
     results = pool.map(download_image, map_args)
 
     # Only keep rows with valid images, and write out training file lists.
@@ -94,5 +94,5 @@ if __name__ == '__main__':
         filename = os.path.join(training_dirname, '{}.txt'.format(split))
         split_df[['image_filename', 'label']].to_csv(
             filename, sep=' ', header=None, index=None)
-    print('Writing train/val for {} successfully downloaded images.'.format(
-        df.shape[0]))
+    print(('Writing train/val for {} successfully downloaded images.'.format(
+        df.shape[0])))

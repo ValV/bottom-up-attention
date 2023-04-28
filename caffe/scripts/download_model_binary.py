@@ -43,7 +43,7 @@ def valid_dirname(dirname):
     try:
         return parse_readme_frontmatter(dirname)
     except Exception as e:
-        print('ERROR: {}'.format(e))
+        print(('ERROR: {}'.format(e)))
         raise argparse.ArgumentTypeError(
             'Must be valid Caffe model directory with a correct readme.md')
 

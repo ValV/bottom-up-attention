@@ -58,7 +58,7 @@ def load_image_ids(split_name, data_root):
           image_id = int(filepath.split('/')[-1][:-4])
           split.append((filepath,image_id))   
     else:
-      print 'Unknown split'
+      print('Unknown split')
     return split
 
     
@@ -150,9 +150,9 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
 
     missing = wanted_ids - found_ids
     if len(missing) == 0:
-        print 'GPU {:d}: already completed {:d}'.format(gpu_id, len(image_ids))
+        print('GPU {:d}: already completed {:d}'.format(gpu_id, len(image_ids)))
     else:
-        print 'GPU {:d}: missing {:d}/{:d}'.format(gpu_id, len(missing), len(image_ids))
+        print('GPU {:d}: missing {:d}/{:d}'.format(gpu_id, len(missing), len(image_ids)))
         
     if len(missing) > 0:
         caffe.set_mode_gpu()
@@ -169,9 +169,9 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
                     json.dump(get_detections_from_im(net, im_file, image_id, ziphelper, data_root), f)
                 _t['misc'].toc()
                 if (count % 100) == 0:
-                    print 'GPU {:d}: {:d}/{:d} {:.3f}s (projected finish: {:.2f} hours)' \
+                    print('GPU {:d}: {:d}/{:d} {:.3f}s (projected finish: {:.2f} hours)' \
                           .format(gpu_id, count+1, len(missing), _t['misc'].average_time, 
-                          _t['misc'].average_time*(len(missing)-count)/3600)
+                          _t['misc'].average_time*(len(missing)-count)/3600))
                 count += 1
 
      

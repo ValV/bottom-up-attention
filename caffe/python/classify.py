@@ -112,25 +112,25 @@ def main(argv):
     # Load numpy array (.npy), directory glob (*.jpg), or image file.
     args.input_file = os.path.expanduser(args.input_file)
     if args.input_file.endswith('npy'):
-        print("Loading file: %s" % args.input_file)
+        print(("Loading file: %s" % args.input_file))
         inputs = np.load(args.input_file)
     elif os.path.isdir(args.input_file):
-        print("Loading folder: %s" % args.input_file)
+        print(("Loading folder: %s" % args.input_file))
         inputs =[caffe.io.load_image(im_f)
                  for im_f in glob.glob(args.input_file + '/*.' + args.ext)]
     else:
-        print("Loading file: %s" % args.input_file)
+        print(("Loading file: %s" % args.input_file))
         inputs = [caffe.io.load_image(args.input_file)]
 
-    print("Classifying %d inputs." % len(inputs))
+    print(("Classifying %d inputs." % len(inputs)))
 
     # Classify.
     start = time.time()
     predictions = classifier.predict(inputs, not args.center_only)
-    print("Done in %.2f s." % (time.time() - start))
+    print(("Done in %.2f s." % (time.time() - start)))
 
     # Save
-    print("Saving results into %s" % args.output_file)
+    print(("Saving results into %s" % args.output_file))
     np.save(args.output_file, predictions)
 
 

@@ -5,7 +5,7 @@ be mapped output-to-input (backward) by the inverse mapping too.
 This helps crop and align feature maps among other uses.
 """
 
-from __future__ import division
+
 import numpy as np
 from caffe import layers as L
 

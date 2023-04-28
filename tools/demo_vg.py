@@ -105,16 +105,16 @@ def demo_tuples(net, image_name):
     timer.tic()
     scores, boxes, attr_scores, rel_scores = im_detect(net, im)
     if attr_scores is not None:
-        print 'Found attribute scores'
+        print('Found attribute scores')
     if rel_scores is not None:
-        print 'Found relation scores'
+        print('Found relation scores')
         rel_scores = rel_scores[:,1:] # drop no relation
         rel_argmax = np.argmax(rel_scores, axis=1).reshape((boxes.shape[0],boxes.shape[0]))
         rel_score = np.max(rel_scores, axis=1).reshape((boxes.shape[0],boxes.shape[0]))
         
     timer.toc()
-    print ('Detection took {:.3f}s for '
-           '{:d} object proposals').format(timer.total_time, boxes.shape[0])    
+    print(('Detection took {:.3f}s for '
+           '{:d} object proposals').format(timer.total_time, boxes.shape[0]))    
 
     # Visualize detections for each class
     CONF_THRESH = 0.1
@@ -177,13 +177,13 @@ def demo_tuples(net, image_name):
         ix = np.argmax(rel_score[i])
         subject = det_objects[ix]
         relation = RELATIONS[rel_argmax[i][ix]]
-        print 'Relation: %.2f %s -> %s -> %s' % (score, obj, relation, subject)
+        print('Relation: %.2f %s -> %s -> %s' % (score, obj, relation, subject))
         # Incoming
         score = np.max(rel_score.T[i])
         ix = np.argmax(rel_score.T[i])
         subject = det_objects[ix]
         relation = RELATIONS[rel_argmax[ix][i]]
-        print 'Relation: %.2f %s -> %s -> %s' % (score, subject, relation, obj)        
+        print('Relation: %.2f %s -> %s -> %s' % (score, subject, relation, obj))        
 
     ax.set_title(('detections with '
                   'p(object|box) >= {:.1f}').format(CONF_THRESH),
@@ -216,8 +216,8 @@ def demo(net, image_name):
     #np.savetxt('rel_argmax.csv', rel_argmax, delimiter=',')
     #print fail
     timer.toc()
-    print ('Detection took {:.3f}s for '
-           '{:d} object proposals').format(timer.total_time, boxes.shape[0])
+    print(('Detection took {:.3f}s for '
+           '{:d} object proposals').format(timer.total_time, boxes.shape[0]))
 
     # Visualize detections for each class
     CONF_THRESH = 0.4
@@ -285,11 +285,11 @@ if __name__ == '__main__':
         cfg.GPU_ID = args.gpu_id
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
-    print '\n\nLoaded network {:s}'.format(caffemodel)
+    print('\n\nLoaded network {:s}'.format(caffemodel))
 
     # Warmup on a dummy image
     im = 128 * np.ones((300, 500, 3), dtype=np.uint8)
-    for i in xrange(2):
+    for i in range(2):
         _, _, _, _= im_detect(net, im)
 
     im_names = ['demo/000456.jpg', 
@@ -317,8 +317,8 @@ if __name__ == '__main__':
                 'vg/VG_100K_2/2403861.jpg',
               ]
     for im_name in im_names:
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Demo for {}'.format(im_name)
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Demo for {}'.format(im_name))
         demo_tuples(net, im_name)
 
     plt.show()

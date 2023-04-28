@@ -42,15 +42,15 @@ class TestCoordMap(unittest.TestCase):
         n = coord_net_spec()
         # identity for 2x pool, 2x deconv
         ax, a, b = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(ax, 1)
-        self.assertEquals(a, 1)
-        self.assertEquals(b, 0)
+        self.assertEqual(ax, 1)
+        self.assertEqual(a, 1)
+        self.assertEqual(b, 0)
         # shift-by-one for 4x pool, 4x deconv
         n = coord_net_spec(pool=4, dstride=4)
         ax, a, b = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(ax, 1)
-        self.assertEquals(a, 1)
-        self.assertEquals(b, -1)
+        self.assertEqual(ax, 1)
+        self.assertEqual(a, 1)
+        self.assertEqual(b, -1)
 
     def test_pass(self):
         """
@@ -64,9 +64,9 @@ class TestCoordMap(unittest.TestCase):
             n.relu, num_output=10, kernel_size=1, stride=1, pad=0)
         for top in [n.relu, n.conv1x1]:
             ax_pass, a_pass, b_pass = coord_map_from_to(top, n.data)
-            self.assertEquals(ax, ax_pass)
-            self.assertEquals(a, a_pass)
-            self.assertEquals(b, b_pass)
+            self.assertEqual(ax, ax_pass)
+            self.assertEqual(a, a_pass)
+            self.assertEqual(b, b_pass)
 
     def test_padding(self):
         """
@@ -78,18 +78,18 @@ class TestCoordMap(unittest.TestCase):
         # conv padding
         n = coord_net_spec(pad=pad)
         _, a_pad, b_pad = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(a, a_pad)
-        self.assertEquals(b - pad, b_pad)
+        self.assertEqual(a, a_pad)
+        self.assertEqual(b - pad, b_pad)
         # deconv padding
         n = coord_net_spec(dpad=pad)
         _, a_pad, b_pad = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(a, a_pad)
-        self.assertEquals(b + pad, b_pad)
+        self.assertEqual(a, a_pad)
+        self.assertEqual(b + pad, b_pad)
         # pad both to cancel out
         n = coord_net_spec(pad=pad, dpad=pad)
         _, a_pad, b_pad = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(a, a_pad)
-        self.assertEquals(b, b_pad)
+        self.assertEqual(a, a_pad)
+        self.assertEqual(b, b_pad)
 
     def test_multi_conv(self):
         """
@@ -102,9 +102,9 @@ class TestCoordMap(unittest.TestCase):
             pad=0)
         ax1, a1, b1 = coord_map_from_to(n.conv_data, n.data)
         ax2, a2, b2 = coord_map_from_to(n.conv_aux, n.aux)
-        self.assertEquals(ax1, ax2)
-        self.assertEquals(a1, a2)
-        self.assertEquals(b1, b2)
+        self.assertEqual(ax1, ax2)
+        self.assertEqual(a1, a2)
+        self.assertEqual(b1, b2)
 
     def test_rect(self):
         """
@@ -117,10 +117,10 @@ class TestCoordMap(unittest.TestCase):
         ax_5x5, a_5x5, b_5x5 = coord_map_from_to(n5x5.deconv, n5x5.data)
         ax_3x5, a_3x5, b_3x5 = coord_map_from_to(n3x5.deconv, n3x5.data)
         self.assertTrue(ax_3x3 == ax_5x5 == ax_3x5)
-        self.assertEquals(a_3x3, a_3x5[0])
-        self.assertEquals(b_3x3, b_3x5[0])
-        self.assertEquals(a_5x5, a_3x5[1])
-        self.assertEquals(b_5x5, b_3x5[1])
+        self.assertEqual(a_3x3, a_3x5[0])
+        self.assertEqual(b_3x3, b_3x5[0])
+        self.assertEqual(a_5x5, a_3x5[1])
+        self.assertEqual(b_5x5, b_3x5[1])
 
     def test_nd_conv(self):
         """
@@ -137,11 +137,11 @@ class TestCoordMap(unittest.TestCase):
         n.deconv = L.Deconvolution(
             n.pool, num_output=10, kernel_size=4, stride=2, pad=0)
         ax, a, b = coord_map_from_to(n.deconv, n.data)
-        self.assertEquals(ax, 1)
+        self.assertEqual(ax, 1)
         self.assertTrue(len(a) == len(b))
         self.assertTrue(np.all(a == 1))
-        self.assertEquals(b[0] - 1, b[1])
-        self.assertEquals(b[1] - 1, b[2])
+        self.assertEqual(b[0] - 1, b[1])
+        self.assertEqual(b[1] - 1, b[2])
 
     def test_crop_of_crop(self):
         """
@@ -153,9 +153,9 @@ class TestCoordMap(unittest.TestCase):
         ax, a, b = coord_map_from_to(n.deconv, n.data)
         n.crop = L.Crop(n.deconv, n.data, axis=2, offset=offset)
         ax_crop, a_crop, b_crop = coord_map_from_to(n.crop, n.data)
-        self.assertEquals(ax, ax_crop)
-        self.assertEquals(a, a_crop)
-        self.assertEquals(b + offset, b_crop)
+        self.assertEqual(ax, ax_crop)
+        self.assertEqual(a, a_crop)
+        self.assertEqual(b + offset, b_crop)
 
     def test_crop_helper(self):
         """

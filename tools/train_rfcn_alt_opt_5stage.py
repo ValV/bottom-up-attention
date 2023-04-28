@@ -22,7 +22,7 @@ import pprint
 import numpy as np
 import sys, os
 import multiprocessing as mp
-import cPickle
+import pickle
 import shutil
 
 
@@ -66,9 +66,9 @@ def parse_args():
 
 def get_roidb(imdb_name, rpn_file=None):
     imdb = get_imdb(imdb_name)
-    print 'Loaded dataset `{:s}` for training'.format(imdb.name)
+    print('Loaded dataset `{:s}` for training'.format(imdb.name))
     imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)
-    print 'Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD)
+    print('Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD))
     if rpn_file is not None:
         imdb.config['rpn_file'] = rpn_file
     roidb = get_training_roidb(imdb)
@@ -128,7 +128,7 @@ def train_rpn(queue=None, imdb_name=None, init_model=None, solver=None,
     cfg.TRAIN.BBOX_REG = False  # applies only to R-FCN bbox regression
     cfg.TRAIN.PROPOSAL_METHOD = 'gt'
     cfg.TRAIN.IMS_PER_BATCH = 1
-    print 'Init model: {}'.format(init_model)
+    print('Init model: {}'.format(init_model))
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -136,9 +136,9 @@ def train_rpn(queue=None, imdb_name=None, init_model=None, solver=None,
     _init_caffe(cfg)
 
     roidb, imdb = get_roidb(imdb_name)
-    print 'roidb len: {}'.format(len(roidb))
+    print('roidb len: {}'.format(len(roidb)))
     output_dir = get_output_dir(imdb)
-    print 'Output will be saved to `{:s}`'.format(output_dir)
+    print('Output will be saved to `{:s}`'.format(output_dir))
     final_caffemodel = os.path.join(output_dir, output_cache)
 
     if os.path.exists(final_caffemodel):
@@ -163,7 +163,7 @@ def rpn_generate(queue=None, imdb_name=None, rpn_model_path=None, cfg=None,
 
     cfg.TEST.RPN_PRE_NMS_TOP_N = 6000     # no pre NMS filtering
     cfg.TEST.RPN_POST_NMS_TOP_N = 300  # limit top boxes after NMS
-    print 'RPN model: {}'.format(rpn_model_path)
+    print('RPN model: {}'.format(rpn_model_path))
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -174,12 +174,12 @@ def rpn_generate(queue=None, imdb_name=None, rpn_model_path=None, cfg=None,
     # We compute them on the image once and then flip the already computed
     # proposals. This might cause a minor loss in mAP (less proposal jittering).
     imdb = get_imdb(imdb_name)
-    print 'Loaded dataset `{:s}` for proposal generation'.format(imdb.name)
+    print('Loaded dataset `{:s}` for proposal generation'.format(imdb.name))
 
     # Load RPN and configure output directory
     rpn_net = caffe.Net(rpn_test_prototxt, rpn_model_path, caffe.TEST)
     output_dir = get_output_dir(imdb)
-    print 'Output will be saved to `{:s}`'.format(output_dir)
+    print('Output will be saved to `{:s}`'.format(output_dir))
     rpn_net_name = os.path.splitext(os.path.basename(rpn_model_path))[0]
     rpn_proposals_path = os.path.join(
         output_dir, rpn_net_name + '_proposals.pkl')
@@ -191,9 +191,9 @@ def rpn_generate(queue=None, imdb_name=None, rpn_model_path=None, cfg=None,
     if not os.path.exists(rpn_proposals_path):
         rpn_proposals = imdb_proposals(rpn_net, imdb)
         with open(rpn_proposals_path, 'wb') as f:
-            cPickle.dump(rpn_proposals, f, cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(rpn_proposals, f, pickle.HIGHEST_PROTOCOL)
     queue.put({'proposal_path': rpn_proposals_path})
-    print 'Wrote RPN proposals to {}'.format(rpn_proposals_path)
+    print('Wrote RPN proposals to {}'.format(rpn_proposals_path))
 
 
 def train_rfcn(queue=None, imdb_name=None, init_model=None, solver=None,
@@ -204,8 +204,8 @@ def train_rfcn(queue=None, imdb_name=None, init_model=None, solver=None,
     cfg.TRAIN.HAS_RPN = False           # not generating prosals on-the-fly
     cfg.TRAIN.PROPOSAL_METHOD = 'rpn'   # use pre-computed RPN proposals instead
     cfg.TRAIN.IMS_PER_BATCH = 1
-    print 'Init model: {}'.format(init_model)
-    print 'RPN proposals: {}'.format(rpn_file)
+    print('Init model: {}'.format(init_model))
+    print('RPN proposals: {}'.format(rpn_file))
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -214,7 +214,7 @@ def train_rfcn(queue=None, imdb_name=None, init_model=None, solver=None,
 
     roidb, imdb = get_roidb(imdb_name, rpn_file=rpn_file)
     output_dir = get_output_dir(imdb)
-    print 'Output will be saved to `{:s}`'.format(output_dir)
+    print('Output will be saved to `{:s}`'.format(output_dir))
     # Train R-FCN
     # Send R-FCN model path over the multiprocessing queue
     final_caffemodel = os.path.join(output_dir, output_cache)
@@ -249,7 +249,7 @@ def rpn_compute_stats(queue=None, imdb_name=None, cfg=None, rpn_test_prototxt=No
     # We compute them on the image once and then flip the already computed
     # proposals. This might cause a minor loss in mAP (less proposal jittering).
     roidb, imdb = get_roidb(imdb_name)
-    print 'Loaded dataset `{:s}` for proposal generation'.format(imdb.name)
+    print('Loaded dataset `{:s}` for proposal generation'.format(imdb.name))
     mean_file = os.path.join(imdb.cache_path, imdb.name + '_means.npy')
     std_file = os.path.join(imdb.cache_path, imdb.name + '_stds.npy')
     if os.path.exists(mean_file) and os.path.exists(std_file):
@@ -259,7 +259,7 @@ def rpn_compute_stats(queue=None, imdb_name=None, cfg=None, rpn_test_prototxt=No
         # Load RPN and configure output directory
         rpn_net = caffe.Net(rpn_test_prototxt, caffe.TEST)
         # Generate proposals on the imdb
-        print 'start computing means/stds, it may take several minutes...'
+        print('start computing means/stds, it may take several minutes...')
         if imdb_name.startswith('coco'):
             means, stds = imdb_rpn_compute_stats(rpn_net, imdb, anchor_scales=(4, 8, 16, 32))
         else:
@@ -293,9 +293,9 @@ if __name__ == '__main__':
     # solves, iters, etc. for each training stage
     solvers, max_iters, rpn_test_prototxt = get_solvers(args.imdb_name, args.net_name, args.model_name)
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 0 RPN, compute normalization means and stds'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 0 RPN, compute normalization means and stds')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     mp_kwargs = dict(
         queue=mp_queue,
         imdb_name=args.imdb_name,
@@ -308,9 +308,9 @@ if __name__ == '__main__':
     cfg.TRAIN.RPN_NORMALIZE_MEANS = stage0_anchor_stats['means']
     cfg.TRAIN.RPN_NORMALIZE_STDS = stage0_anchor_stats['stds']
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 1 RPN, init from ImageNet model'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 1 RPN, init from ImageNet model')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
     mp_kwargs = dict(
@@ -326,9 +326,9 @@ if __name__ == '__main__':
     rpn_stage1_out = mp_queue.get()
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 1 RPN, generate proposals'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 1 RPN, generate proposals')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     mp_kwargs = dict(
             queue=mp_queue,
@@ -341,9 +341,9 @@ if __name__ == '__main__':
     rpn_stage1_out['proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 1 RPN, generate proposals'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 1 RPN, generate proposals')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     mp_kwargs = dict(
         queue=mp_queue,
@@ -356,9 +356,9 @@ if __name__ == '__main__':
     rpn_stage1_out['test_proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 1 R-FCN using RPN proposals, init from ImageNet model'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 1 R-FCN using RPN proposals, init from ImageNet model')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
     mp_kwargs = dict(
@@ -375,9 +375,9 @@ if __name__ == '__main__':
     rfcn_stage1_out = mp_queue.get()
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 2 RPN, init from stage1 R-FCN model'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 2 RPN, init from stage1 R-FCN model')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
     mp_kwargs = dict(
@@ -393,9 +393,9 @@ if __name__ == '__main__':
     rpn_stage2_out = mp_queue.get()
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 2 RPN, generate proposals'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 2 RPN, generate proposals')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     mp_kwargs = dict(
         queue=mp_queue,
@@ -419,9 +419,9 @@ if __name__ == '__main__':
     rpn_stage2_out['test_proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 2 R-FCN using Stage-2 RPN proposals, init from ImageNet model'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 2 R-FCN using Stage-2 RPN proposals, init from ImageNet model')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
     mp_kwargs = dict(
@@ -438,9 +438,9 @@ if __name__ == '__main__':
     rfcn_stage2_out = mp_queue.get()
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 3 RPN, init from stage1 R-FCN model'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 3 RPN, init from stage1 R-FCN model')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage3'
     mp_kwargs = dict(
@@ -456,9 +456,9 @@ if __name__ == '__main__':
     rpn_stage3_out = mp_queue.get()
     p.join()
 
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-    print 'Stage 3 RPN, generate test proposals only'
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Stage 3 RPN, generate test proposals only')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     mp_kwargs = dict(
         queue=mp_queue,
@@ -471,7 +471,7 @@ if __name__ == '__main__':
     rpn_stage3_out['test_proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
 
-    print 'Final model: {}'.format(str(rfcn_stage2_out['model_path']))
-    print 'Final RPN: {}'.format(str(rpn_stage3_out['test_proposal_path']))
+    print('Final model: {}'.format(str(rfcn_stage2_out['model_path'])))
+    print('Final RPN: {}'.format(str(rpn_stage3_out['test_proposal_path'])))
 
 

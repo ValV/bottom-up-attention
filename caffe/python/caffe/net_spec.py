@@ -37,7 +37,7 @@ def param_name_dict():
     # strip the final '_param' or 'Parameter'
     param_names = [s[:-len('_param')] for s in param_names]
     param_type_names = [s[:-len('Parameter')] for s in param_type_names]
-    return dict(zip(param_type_names, param_names))
+    return dict(list(zip(param_type_names, param_names)))
 
 
 def to_proto(*tops):
@@ -49,7 +49,7 @@ def to_proto(*tops):
     for top in tops:
         top.fn._to_proto(layers, {}, autonames)
     net = caffe_pb2.NetParameter()
-    net.layer.extend(layers.values())
+    net.layer.extend(list(layers.values()))
     return net
 
 
@@ -188,7 +188,7 @@ class NetSpec(object):
         for name, top in six.iteritems(self.tops):
             top._to_proto(layers, names, autonames)
         net = caffe_pb2.NetParameter()
-        net.layer.extend(layers.values())
+        net.layer.extend(list(layers.values()))
         return net
 
 

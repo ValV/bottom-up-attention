@@ -1,6 +1,6 @@
-from models import Image, Object, Attribute, Relationship
-from models import Region, Graph, QA, QAObject, Synset
-import httplib
+from .models import Image, Object, Attribute, Relationship
+from .models import Region, Graph, QA, QAObject, Synset
+import http.client
 import json
 
 """
@@ -15,7 +15,7 @@ def GetDataDir():
 Helper Method used to get all data from request string.
 """
 def RetrieveData(request):
-  connection = httplib.HTTPConnection("visualgenome.org", '443')
+  connection = http.client.HTTPConnection("visualgenome.org", '443')
   connection.request("GET", request)
   response = connection.getresponse()
   jsonString = response.read()
@@ -76,7 +76,7 @@ Helper to parse region descriptions.
 """
 def ParseRegionDescriptions(data, image):
   regions = []
-  if data[0].has_key('region_id'):
+  if 'region_id' in data[0]:
     region_id_key = 'region_id'
   else:
     region_id_key = 'id'

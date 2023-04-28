@@ -35,7 +35,7 @@ with open(os.path.join(splitDir, 'coco_splits/image_info_test2014.json')) as f:
   coco_data = json.load(f)
   for item in coco_data['images']:
     coco_test_ids.add(item['id'])
-print "There are %d coco test images" % len(coco_test_ids)
+print("There are %d coco test images" % len(coco_test_ids))
 
 # Load karpathy coco splits
 karpathy_train = set()
@@ -55,7 +55,7 @@ with open(os.path.join(splitDir, 'coco_splits/karpathy_test_images.txt')) as f:
   for line in f.readlines():
     image_id=int(line.split('.')[0].split('_')[-1])
     karpathy_test.add(image_id)
-print "Karpathy splits are %d, %d, %d (train, val, test)" % (len(karpathy_train), len(karpathy_val), len(karpathy_test))
+print("Karpathy splits are %d, %d, %d (train, val, test)" % (len(karpathy_train), len(karpathy_val), len(karpathy_test)))
     
     
 # Load VG image metadata
@@ -65,11 +65,11 @@ with open(os.path.join(dataDir, 'image_data.json')) as f:
   for item in metadata:
     if item['coco_id']:
       coco_ids.add(item['coco_id'])
-print "Found %d visual genome images claiming coco ids" % len(coco_ids)
-print "Overlap with COCO test is %d" % len(coco_test_ids & coco_ids)
-print "Overlap with Karpathy train is %d" % len(karpathy_train & coco_ids)
-print "Overlap with Karpathy val is %d" % len(karpathy_val & coco_ids)
-print "Overlap with Karpathy test is %d" % len(karpathy_test & coco_ids)
+print("Found %d visual genome images claiming coco ids" % len(coco_ids))
+print("Overlap with COCO test is %d" % len(coco_test_ids & coco_ids))
+print("Overlap with Karpathy train is %d" % len(karpathy_train & coco_ids))
+print("Overlap with Karpathy val is %d" % len(karpathy_val & coco_ids))
+print("Overlap with Karpathy test is %d" % len(karpathy_test & coco_ids))
 
 # Output
 #There are 40775 coco test images
@@ -126,7 +126,7 @@ for outfile, split in zip([train_list_file, val_list_file, test_list_file], [tra
         img_h.append(item['height'])
         img_w.append(item['width'])
     # Shuffle the images.
-    idx = [i for i in xrange(len(img_files))]
+    idx = [i for i in range(len(img_files))]
     shuffle(idx)
     # Save splits
     with open(outfile, "w") as f:

@@ -101,3 +101,7 @@ LOCK
 LOG*
 CURRENT
 MANIFEST-*
+
+# Backup files (e.g. 2to3)
+*.bak
+

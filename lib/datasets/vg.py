@@ -12,11 +12,11 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import scipy.sparse
 import utils.cython_bbox
-import cPickle
+import pickle
 import gzip
 import PIL
 import json
-from vg_eval import vg_eval
+from .vg_eval import vg_eval
 from fast_rcnn.config import cfg
 
 class vg(imdb):
@@ -139,18 +139,18 @@ class vg(imdb):
         cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
         if os.path.exists(cache_file):
             fid = gzip.open(cache_file,'rb') 
-            roidb = cPickle.load(fid)
+            roidb = pickle.load(fid)
             fid.close()
-            print '{} gt roidb loaded from {}'.format(self.name, cache_file)
+            print('{} gt roidb loaded from {}'.format(self.name, cache_file))
             return roidb
 
         gt_roidb = [self._load_vg_annotation(index)
                     for index in self.image_index]
 
         fid = gzip.open(cache_file,'wb')       
-        cPickle.dump(gt_roidb, fid, cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(gt_roidb, fid, pickle.HIGHEST_PROTOCOL)
         fid.close()
-        print 'wrote gt roidb to {}'.format(cache_file)
+        print('wrote gt roidb to {}'.format(cache_file))
         return gt_roidb
       
     def _get_size(self, index):
@@ -191,7 +191,7 @@ class vg(imdb):
                 y2 = min(height-1,float(bbox.find('ymax').text))
                 # If bboxes are not positive, just give whole image coords (there are a few examples)
                 if x2 < x1 or y2 < y1:
-                    print 'Failed bbox in %s, object %s' % (filename, obj_name)
+                    print('Failed bbox in %s, object %s' % (filename, obj_name))
                     x1 = 0
                     y1 = 0
                     x2 = width-1
@@ -273,7 +273,7 @@ class vg(imdb):
         for cls_ind, cls in enumerate(classes):
             if cls == '__background__':
                 continue
-            print 'Writing "{}" vg results file'.format(cls)
+            print('Writing "{}" vg results file'.format(cls))
             filename = self._get_vg_results_file_template(output_dir).format(cls)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
@@ -281,7 +281,7 @@ class vg(imdb):
                     if dets == []:
                         continue
                     # the VOCdevkit expects 1-based indices
-                    for k in xrange(dets.shape[0]):
+                    for k in range(dets.shape[0]):
                         f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
                                 format(str(index), dets[k, -1],
                                        dets[k, 0] + 1, dets[k, 1] + 1,
@@ -295,7 +295,7 @@ class vg(imdb):
         thresh = []
         # The PASCAL VOC metric changed in 2010
         use_07_metric = False
-        print 'VOC07 metric? ' + ('Yes' if use_07_metric else 'No')
+        print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
         # Load ground truth    
@@ -320,10 +320,10 @@ class vg(imdb):
                 thresh += [0]
             aps += [ap]
             nposs += [float(npos)]
-            print('AP for {} = {:.4f} (npos={:,})'.format(cls, ap, npos))
+            print(('AP for {} = {:.4f} (npos={:,})'.format(cls, ap, npos)))
             if pickle:
                 with open(os.path.join(output_dir, cls + '_pr.pkl'), 'w') as f:
-                    cPickle.dump({'rec': rec, 'prec': prec, 'ap': ap, 
+                    pickle.dump({'rec': rec, 'prec': prec, 'ap': ap, 
                         'scores': scores, 'npos':npos}, f)
          
         # Set thresh to mean for classes with poor results 
@@ -341,14 +341,14 @@ class vg(imdb):
                 
         weights = np.array(nposs)
         weights /= weights.sum()
-        print('Mean AP = {:.4f}'.format(np.mean(aps)))
-        print('Weighted Mean AP = {:.4f}'.format(np.average(aps, weights=weights)))
-        print('Mean Detection Threshold = {:.3f}'.format(avg_thresh))
+        print(('Mean AP = {:.4f}'.format(np.mean(aps))))
+        print(('Weighted Mean AP = {:.4f}'.format(np.average(aps, weights=weights))))
+        print(('Mean Detection Threshold = {:.3f}'.format(avg_thresh)))
         print('~~~~~~~~')
         print('Results:')
         for ap,npos in zip(aps,nposs):
-            print('{:.3f}\t{:.3f}'.format(ap,npos))
-        print('{:.3f}'.format(np.mean(aps)))
+            print(('{:.3f}\t{:.3f}'.format(ap,npos)))
+        print(('{:.3f}'.format(np.mean(aps))))
         print('~~~~~~~~')
         print('')
         print('--------------------------------------------------------------')

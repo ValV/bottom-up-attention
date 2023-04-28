@@ -58,7 +58,7 @@ def print_table(table, max_width):
             right_col += width
             row_str += cell + ' '
             row_str += ' ' * max(right_col - printed_len(row_str), 0)
-        print row_str
+        print(row_str)
 
 def summarize_net(net):
     disconnected_tops = set()
@@ -113,8 +113,8 @@ def summarize_net(net):
             arg_str = ''
 
         if len(lr.param) > 0:
-            param_strs = map(format_param, lr.param)
-            if max(map(len, param_strs)) > 0:
+            param_strs = list(map(format_param, lr.param))
+            if max(list(map(len, param_strs))) > 0:
                 param_str = '({})'.format(', '.join(param_strs))
             else:
                 param_str = ''
