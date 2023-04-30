@@ -129,7 +129,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
     // Get max algo counts for forward and backward
     int num_fwd = 1, num_bwd_filters = 1, num_bwd_data = 1;
-    CUDA_CHECK(cudnnConvolutionForwardAlgorithmMaxCount(handle_[0],
+    CUDA_CHECK(cudnnGetConvolutionForwardAlgorithmMaxCount(handle_[0],
       &num_fwd));
     CUDA_CHECK(cudnnGetConvolutionBackwardFilterAlgorithmMaxCount(handle_[0],
       &num_bwd_filters));
