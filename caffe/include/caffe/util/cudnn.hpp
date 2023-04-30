@@ -2,6 +2,8 @@
 #define CAFFE_UTIL_CUDNN_H_
 #ifdef USE_CUDNN
 
+#include <algorithm>
+#include <vector>
 #include <cudnn.h>
 
 #include "caffe/common.hpp"
@@ -44,6 +46,10 @@ inline const char* cudnnGetErrorString(cudnnStatus_t status) {
 #if CUDNN_VERSION_MIN(6, 0, 0)
     case CUDNN_STATUS_RUNTIME_PREREQUISITE_MISSING:
       return "CUDNN_STATUS_RUNTIME_PREREQUISITE_MISSING";
+#endif
+#if CUDNN_VERSION_MIN(8, 0, 0)
+    case CUDNN_STATUS_VERSION_MISMATCH:
+      return "CUDNN_STATUS_VERSION_MISMATCH";
 #endif
   }
   return "Unknown cudnn status";
@@ -154,6 +160,22 @@ inline void createActivationDescriptor(cudnnActivationDescriptor_t* activ_desc,
   CUDNN_CHECK(cudnnSetActivationDescriptor(*activ_desc, mode,
                                            CUDNN_PROPAGATE_NAN, Dtype(0)));
 }
+
+template<typename T> inline T getOptimalAlgorithm(std::vector<T> const &perf,
+                                                  size_t algo_count,
+                                                  size_t memory_limit) {
+  algo_count = std::min(algo_count, perf.size());
+  for (size_t i = 0; i < algo_count; i++) {
+    if (perf[i].memory <= memory_limit) {
+      return perf[i];
+    }
+  }
+  if (!perf.empty()) {
+    return perf[0];
+  }
+  return T();
+}
+
 
 }  // namespace cudnn
 
