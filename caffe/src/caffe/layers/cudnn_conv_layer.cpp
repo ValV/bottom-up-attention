@@ -143,11 +143,11 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
     std::vector<cudnnConvolutionBwdFilterAlgoPerf_t>
       perf_bwd_filter(std::max(num_bwd_filters, 1));
-    cudnnConvolutionFwdAlgoPerf_t perf_bwd_filter_opt;
+    cudnnConvolutionBwdFilterAlgoPerf_t perf_bwd_filter_opt;
 
     std::vector<cudnnConvolutionBwdDataAlgoPerf_t>
       perf_bwd_data(std::max(num_bwd_data, 1));
-    cudnnConvolutionFwdAlgoPerf_t perf_bwd_data_opt;
+    cudnnConvolutionBwdDataAlgoPerf_t perf_bwd_data_opt;
 
     int algo_count = 0;
     // Choose forward algorithm and workspace
