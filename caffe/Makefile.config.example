@@ -84,7 +84,9 @@ PYTHON_LIB := $(ANACONDA_HOME)/lib
 # WITH_PYTHON_LAYER := 1
 
 # Whatever else you find you need goes here.
-INCLUDE_DIRS := $(CUDA_DIR)/include $(PYTHON_INCLUDE) /usr/local/include /usr/include /usr/include/opencv4 /usr/include/hdf5/serial
+INCLUDE_DIRS := $(CUDA_DIR)/include $(PYTHON_INCLUDE) /usr/local/include \
+                /usr/include /usr/include/opencv4 /usr/include/hdf5/serial \
+                /usr/include/mkl
 LIBRARY_DIRS := $(CUDA_DIR)/lib64 $(PYTHON_LIB) /usr/local/lib /usr/lib
 
 # If Homebrew is installed at a non standard location (for example your home directory) and you use it for general dependencies
