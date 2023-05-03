@@ -65,6 +65,9 @@ BLAS := mkl
 ANACONDA_HOME := /opt/conda
 PYTHON_INCLUDE := $(ANACONDA_HOME)/include \
                   $(ANACONDA_HOME)/include/python3.7m \
+                  $(ANACONDA_HOME)/include/opencv4 \
+                  $(ANACONDA_HOME)/include/hdf5/serial \
+                  $(ANACONDA_HOME)/include/mkl \
                   $(ANACONDA_HOME)/lib/python3.7/site-packages/numpy/core/include
 
 # Uncomment to use Python 3 (default is Python 2)
