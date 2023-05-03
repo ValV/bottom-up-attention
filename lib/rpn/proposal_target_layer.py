@@ -25,7 +25,7 @@ class ProposalTargetLayer(caffe.Layer):
         self._count = 0
         self._fg_num = 0
         self._bg_num = 0
-        layer_params = yaml.safe_load(self.param_str)
+        layer_params = yaml.full_load(self.param_str)
         self._num_classes = layer_params['num_classes']
         if 'num_attr_classes' in layer_params:
             self._num_attr_classes = layer_params['num_attr_classes']

@@ -14,7 +14,7 @@ class HeatmapLayer(caffe.Layer):
     """
 
     def setup(self, bottom, top):
-        layer_params = yaml.safe_load(self.param_str)
+        layer_params = yaml.full_load(self.param_str)
         self._output_w = layer_params['output_w']
         self._output_h = layer_params['output_h']
         self._out_size = np.array([self._output_w, self._output_h, 
