@@ -96,7 +96,7 @@ void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 #ifdef CPU_ONLY
-STUB_GPU_FORWARD(ArgMaxLayer);
+STUB_GPU_FORWARD(ArgMaxLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(ArgMaxLayer);
