@@ -1,36 +1,52 @@
 #!/usr/bin/env python
 
 
-"""Generate bottom-up attention features as a tsv file. Can use multiple gpus, each produces a 
-   separate tsv file that can be merged later (e.g. by using merge_tsv function). 
-   Modify the load_image_ids script as necessary for your data location. """
+"""Generate bottom-up attention features as a tsv file. Can use multiple gpus,
+   each produces a separate tsv file that can be merged later (e.g. by using
+   merge_tsv function). Modify the load_image_ids script as necessary for your
+   data location.
+"""
 
 # Example:
-# python ./tools/generate_tsv_v2.py --gpu 0,1,2,3,4,5,6,7 --cfg experiments/cfgs/faster_rcnn_end2end_resnet.yml --def models/vg/ResNet-101/faster_rcnn_end2end_final/test.prototxt --net data/faster_rcnn_models/resnet101_faster_rcnn_final.caffemodel --split conceptual_captions_train --data_root {Conceptual_Captions_Root} --out {Conceptual_Captions_Root}/train_frcnn/
+# python ./tools/generate_tsv_v2.py
+# --gpu 0,1,2,3,4,5,6,7
+# --cfg experiments/cfgs/faster_rcnn_end2end_resnet.yml
+# --def models/vg/ResNet-101/faster_rcnn_end2end_final/test.prototxt
+# --net data/faster_rcnn_models/resnet101_faster_rcnn_final.caffemodel
+# --split conceptual_captions_train --data_root {Conceptual_Captions_Root}
+# --out {Conceptual_Captions_Root}/train_frcnn/
 
 
-import _init_paths
-from fast_rcnn.config import cfg, cfg_from_file
-from fast_rcnn.test import im_detect, _get_blobs
+import _init_paths  # FIXME: initialize local library paths in another way
+
+import argparse
+import base64
+import csv
+import json
+import os
+import random
+import sys
+
+from multiprocessing import Process
+from pprint import pprint
+
+import caffe
+
+from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
 from fast_rcnn.nms_wrapper import nms
+from fast_rcnn.test import im_detect, _get_blobs
 from utils.timer import Timer
 from zip_helper import ZipHelper
 
-import caffe
-import argparse
-import pprint
-import time, os, sys
-import base64
+import cv2 as cv
 import numpy as np
-import cv2
-import csv
-from multiprocessing import Process
-import random
-import json
 
-csv.field_size_limit(sys.maxsize)
+csv.field_size_limit(sys.maxsize)  # TODO: check unused
 
-FIELDNAMES = ['image_id', 'image_w', 'image_h', 'num_boxes', 'boxes', 'classes', 'attrs', 'features']
+FIELDNAMES = [
+    'image_id', 'image_w', 'image_h', 'num_boxes',
+    'boxes', 'classes', 'attrs', 'features'
+]
 
 # Settings for the number of features per image. 
 MIN_BOXES = 10
@@ -38,7 +54,9 @@ MAX_BOXES = 100
 
 
 def load_image_ids(split_name, data_root):
-    ''' Load a list of (path,image_id tuples). Modify this to suit your data locations. '''
+    """
+    Load a list of (path,image_id tuples). Modify this to suit your data locations
+    """
     split = []
     if split_name == 'conceptual_captions_train':
         with open(os.path.join(data_root, 'utils/train.json')) as f:
@@ -63,7 +81,7 @@ def load_image_ids(split_name, data_root):
 
 def get_detections_from_im(net, im_file, image_id, ziphelper, data_root, conf_thresh=0.5):
     zip_image = ziphelper.imread(str(os.path.join(data_root, im_file)))
-    im = cv2.cvtColor(np.array(zip_image), cv2.COLOR_RGB2BGR)
+    im = cv.cvtColor(np.array(zip_image), cv.COLOR_RGB2BGR)
     scores, boxes, attr_scores, rel_scores = im_detect(net, im)
 
     # Keep the original boxes, don't worry about the regresssion bbox outputs
@@ -169,12 +187,16 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
                 _t['misc'].tic()
                 json_file = f"{image_id:08d}.json"
                 with open(os.path.join(outfolder, json_file), 'w') as f:
-                    json.dump(get_detections_from_im(net, im_file, image_id, ziphelper, data_root), f)
+                    json.dump(get_detections_from_im(net, im_file, image_id,
+                                                     ziphelper, data_root), f)
                 _t['misc'].toc()
                 if (count % 100) == 0:
-                    print('GPU {:d}: {:d}/{:d} {:.3f}s (projected finish: {:.2f} hours)' \
-                          .format(gpu_id, count + 1, len(missing), _t['misc'].average_time,
-                                  _t['misc'].average_time * (len(missing) - count) / 3600))
+                    time_avg = _t['misc'].average_time
+                    print(
+                        f"{device}: {count + 1:d}/{len(missing):d} "
+                        f"{time_avg:.3f}s (projected finish: "
+                        f"{time_avg * (len(missing) - count) / 3600:.2f} hours)"
+                    )
                 count += 1
 
 
@@ -194,7 +216,7 @@ if __name__ == '__main__':
     gpus = [int(i) for i in gpu_list]
 
     print('Using config:')
-    pprint.pprint(cfg)
+    pprint(cfg)
     assert cfg.TEST.HAS_RPN
 
     image_ids = load_image_ids(args.data_split, args.data_root)
