@@ -147,7 +147,7 @@ ext_modules = [
         ["nms/cpu_nms.pyx"],
         extra_compile_args={'gcc': ["-Wno-cpp", "-Wno-unused-function"]},
         include_dirs=[numpy_include]
-    ) if CUDA['home'] else
+    ) if not CUDA['home'] else
     Extension(
         'nms.gpu_nms',
         ['nms/nms_kernel.cu', 'nms/gpu_nms.pyx'],
