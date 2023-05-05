@@ -11,6 +11,7 @@ from distutils.extension import Extension
 
 import numpy as np
 
+from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
 
@@ -93,7 +94,7 @@ def customize_compiler_for_nvcc(self):
     the OO route, I have this. Note, it's kindof like a wierd functional
     subclassing going on."""
 
-    # tell the compiler it can processes .cu
+    # tell the compiler it can process .cu
     self.src_extensions.append('.cu')
 
     # save references to the default compiler_so and _comple methods
@@ -124,7 +125,8 @@ def customize_compiler_for_nvcc(self):
 # run the customize_compiler
 class custom_build_ext(build_ext):
     def build_extensions(self):
-        customize_compiler_for_nvcc(self.compiler)
+        if CUDA['home']:
+            customize_compiler_for_nvcc(self.compiler)
         build_ext.build_extensions(self)
 
 
@@ -175,7 +177,10 @@ ext_modules = [
 
 setup(
     name='fast_rcnn',
-    ext_modules=ext_modules,
+    ext_modules=cythonize(
+        ext_modules,
+        compiler_directives={'language_level': '3'}
+    ),
     # inject our custom trigger
     cmdclass={'build_ext': custom_build_ext},
 )
