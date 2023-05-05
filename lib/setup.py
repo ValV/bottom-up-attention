@@ -126,7 +126,10 @@ def customize_compiler_for_nvcc(self):
 class custom_build_ext(build_ext):
     def build_extensions(self):
         if CUDA['home']:
+            print(f"Building with CUDA: {CUDA['home']}")
             customize_compiler_for_nvcc(self.compiler)
+        else:
+            print(f"Building for CPU only")
         build_ext.build_extensions(self)
 
 
@@ -176,6 +179,8 @@ ext_modules = [
         },
     ),
 ]
+
+print(f"DEBUG: ext modules = {ext_modules}")
 
 setup(
     name='fast_rcnn',
