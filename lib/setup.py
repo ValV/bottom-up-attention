@@ -130,6 +130,8 @@ class custom_build_ext(build_ext):
         build_ext.build_extensions(self)
 
 
+print(f"DEBUG: CUDA = {CUDA}")
+
 ext_modules = [
     Extension(
         "utils.cython_bbox",
