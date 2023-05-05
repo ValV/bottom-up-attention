@@ -95,11 +95,12 @@ def customize_compiler_for_nvcc(self):
     subclassing going on."""
 
     # tell the compiler it can process .cu
-    self.src_extensions.append('.cu')
+    if CUDA['home']:
+        self.src_extensions.append('.cu')
 
     # save references to the default compiler_so and _comple methods
     default_compiler_so = self.compiler_so
-    super = self._compile
+    _compile_default = self._compile
 
     # now redefine the _compile method. This gets executed for each
     # object but distutils doesn't have the ability to change compilers
@@ -114,7 +115,7 @@ def customize_compiler_for_nvcc(self):
         else:
             postargs = extra_postargs['gcc']
 
-        super(obj, src, ext, cc_args, postargs, pp_opts)
+        _compile_default(obj, src, ext, cc_args, postargs, pp_opts)
         # reset the default compiler_so, which we might have changed for cuda
         self.compiler_so = default_compiler_so
 
@@ -127,9 +128,9 @@ class custom_build_ext(build_ext):
     def build_extensions(self):
         if CUDA['home']:
             print(f"Building with CUDA: {CUDA['home']}")
-            customize_compiler_for_nvcc(self.compiler)
         else:
             print(f"Building for CPU only")
+        customize_compiler_for_nvcc(self.compiler)
         build_ext.build_extensions(self)
 
 
