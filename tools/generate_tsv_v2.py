@@ -166,14 +166,14 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
                 found_ids.add(ids)
 
     missing = wanted_ids - found_ids
-    device = f'GPU {gpu_id:d}' if isinstance(gpu_id, int) and gpu_id > 0 else 'CPU'
+    device = f'GPU {gpu_id:d}' if isinstance(gpu_id, int) and gpu_id >= 0 else 'CPU'
     if len(missing) == 0:
         print(f"{device}: already completed {len(image_ids):d}")
     else:
         print(f"{device}: missing {len(missing):d}/{len(image_ids):d}")
 
     if len(missing) > 0:
-        if isinstance(gpu_id, int) and gpu_id > 0:
+        if isinstance(gpu_id, int) and gpu_id >= 0:
             caffe.set_mode_gpu()
             caffe.set_device(gpu_id)
         else:
