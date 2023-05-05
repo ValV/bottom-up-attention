@@ -5,14 +5,13 @@
    separate tsv file that can be merged later (e.g. by using merge_tsv function). 
    Modify the load_image_ids script as necessary for your data location. """
 
-
 # Example:
 # python ./tools/generate_tsv_v2.py --gpu 0,1,2,3,4,5,6,7 --cfg experiments/cfgs/faster_rcnn_end2end_resnet.yml --def models/vg/ResNet-101/faster_rcnn_end2end_final/test.prototxt --net data/faster_rcnn_models/resnet101_faster_rcnn_final.caffemodel --split conceptual_captions_train --data_root {Conceptual_Captions_Root} --out {Conceptual_Captions_Root}/train_frcnn/
 
 
 import _init_paths
 from fast_rcnn.config import cfg, cfg_from_file
-from fast_rcnn.test import im_detect,_get_blobs
+from fast_rcnn.test import im_detect, _get_blobs
 from fast_rcnn.nms_wrapper import nms
 from utils.timer import Timer
 from zip_helper import ZipHelper
@@ -31,37 +30,37 @@ import json
 
 csv.field_size_limit(sys.maxsize)
 
-
-FIELDNAMES = ['image_id', 'image_w','image_h','num_boxes', 'boxes', 'classes', 'attrs', 'features']
+FIELDNAMES = ['image_id', 'image_w', 'image_h', 'num_boxes', 'boxes', 'classes', 'attrs', 'features']
 
 # Settings for the number of features per image. 
 MIN_BOXES = 10
 MAX_BOXES = 100
 
+
 def load_image_ids(split_name, data_root):
     ''' Load a list of (path,image_id tuples). Modify this to suit your data locations. '''
     split = []
     if split_name == 'conceptual_captions_train':
-      with open(os.path.join(data_root, 'utils/train.json')) as f:
-        for cnt, line in enumerate(f):  
-          d = json.loads(line)
-          cap = d['caption']
-          filepath = d['image']
-          image_id = int(filepath.split('/')[-1][:-4])
-          split.append((filepath,image_id))
+        with open(os.path.join(data_root, 'utils/train.json')) as f:
+            for cnt, line in enumerate(f):
+                d = json.loads(line)
+                cap = d['caption']
+                filepath = d['image']
+                image_id = int(filepath.split('/')[-1][:-4])
+                split.append((filepath, image_id))
     elif split_name == 'conceptual_captions_val':
-      with open(os.path.join(data_root, 'utils/val.json')) as f:
-        for cnt, line in enumerate(f):  
-          d = json.loads(line)
-          cap = d['caption']
-          filepath = d['image']
-          image_id = int(filepath.split('/')[-1][:-4])
-          split.append((filepath,image_id))   
+        with open(os.path.join(data_root, 'utils/val.json')) as f:
+            for cnt, line in enumerate(f):
+                d = json.loads(line)
+                cap = d['caption']
+                filepath = d['image']
+                image_id = int(filepath.split('/')[-1][:-4])
+                split.append((filepath, image_id))
     else:
-      print('Unknown split')
+        print('Unknown split')
     return split
 
-    
+
 def get_detections_from_im(net, im_file, image_id, ziphelper, data_root, conf_thresh=0.5):
     zip_image = ziphelper.imread(str(os.path.join(data_root, im_file)))
     im = cv2.cvtColor(np.array(zip_image), cv2.COLOR_RGB2BGR)
@@ -78,7 +77,7 @@ def get_detections_from_im(net, im_file, image_id, ziphelper, data_root, conf_th
 
     # Keep only the best detections
     max_conf = np.zeros((rois.shape[0]))
-    for cls_ind in range(1,cls_prob.shape[1]):
+    for cls_ind in range(1, cls_prob.shape[1]):
         cls_scores = scores[:, cls_ind]
         dets = np.hstack((cls_boxes, cls_scores[:, np.newaxis])).astype(np.float32)
         keep = np.array(nms(dets, cfg.TEST.NMS))
@@ -89,17 +88,17 @@ def get_detections_from_im(net, im_file, image_id, ziphelper, data_root, conf_th
         keep_boxes = np.argsort(max_conf)[::-1][:MIN_BOXES]
     elif len(keep_boxes) > MAX_BOXES:
         keep_boxes = np.argsort(max_conf)[::-1][:MAX_BOXES]
-   
+
     return {
         'image_id': image_id,
         'image_h': np.size(im, 0),
         'image_w': np.size(im, 1),
-        'num_boxes' : len(keep_boxes),
+        'num_boxes': len(keep_boxes),
         'boxes': base64.b64encode(cls_boxes[keep_boxes]),
         'classes': base64.b64encode(scores[keep_boxes]),
         'attrs': base64.b64encode(attr_scores[keep_boxes]),
         'features': base64.b64encode(pool5[keep_boxes])
-    }   
+    }
 
 
 def parse_args():
@@ -137,31 +136,35 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-    
+
 def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
     # First check if file exists, and if it is complete
     wanted_ids = set([int(image_id[1]) for image_id in image_ids])
     found_ids = set()
     if os.path.exists(outfolder):
         for ids in wanted_ids:
-            json_file = "{:08d}.json".format(ids)
+            json_file = f"{ids:08d}.json"
             if os.path.exists(os.path.join(outfolder, json_file)):
-                found_ids.add(int(item['image_id']))
+                found_ids.add(ids)
 
     missing = wanted_ids - found_ids
+    device = f'GPU {gpu_id:d}' if isinstance(gpu_id, int) and gpu_id > 0 else 'CPU'
     if len(missing) == 0:
-        print('GPU {:d}: already completed {:d}'.format(gpu_id, len(image_ids)))
+        print(f"{device}: already completed {len(image_ids):d}")
     else:
-        print('GPU {:d}: missing {:d}/{:d}'.format(gpu_id, len(missing), len(image_ids)))
-        
+        print(f"{device}: missing {len(missing):d}/{len(image_ids):d}")
+
     if len(missing) > 0:
-        caffe.set_mode_gpu()
-        caffe.set_device(gpu_id)
+        if isinstance(gpu_id, int) and gpu_id > 0:
+            caffe.set_mode_gpu()
+            caffe.set_device(gpu_id)
+        else:
+            caffe.set_mode_cpu()
         net = caffe.Net(prototxt, caffe.TEST, weights=weights)
         ziphelper = ZipHelper()
-        _t = {'misc' : Timer()}
+        _t = {'misc': Timer()}
         count = 0
-        for im_file,image_id in image_ids:
+        for im_file, image_id in image_ids:
             if int(image_id) in missing:
                 _t['misc'].tic()
                 json_file = "{:08d}.json".format(image_id)
@@ -170,11 +173,11 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
                 _t['misc'].toc()
                 if (count % 100) == 0:
                     print('GPU {:d}: {:d}/{:d} {:.3f}s (projected finish: {:.2f} hours)' \
-                          .format(gpu_id, count+1, len(missing), _t['misc'].average_time, 
-                          _t['misc'].average_time*(len(missing)-count)/3600))
+                          .format(gpu_id, count + 1, len(missing), _t['misc'].average_time,
+                                  _t['misc'].average_time * (len(missing) - count) / 3600))
                 count += 1
 
-     
+
 if __name__ == '__main__':
     args = parse_args()
 
@@ -199,20 +202,19 @@ if __name__ == '__main__':
     random.shuffle(image_ids)
     # Split image ids between gpus
     if not os.path.exists(args.outfolder):
-      os.makedirs(args.outfolder)
+        os.makedirs(args.outfolder)
 
     image_ids = [image_ids[i::len(gpus)] for i in range(len(gpus))]
-    
+
     caffe.init_log()
     caffe.log('Using devices %s' % str(gpus))
-    procs = []    
-    
-    for i,gpu_id in enumerate(gpus):
+    procs = []
+
+    for i, gpu_id in enumerate(gpus):
         p = Process(target=generate_tsv,
                     args=(gpu_id, args.prototxt, args.caffemodel, image_ids[i], args.data_root, args.outfolder))
         p.daemon = True
         p.start()
         procs.append(p)
     for p in procs:
-        p.join()            
-                  
+        p.join()
