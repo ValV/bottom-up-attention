@@ -181,7 +181,7 @@ ext_modules = [
     ),
 ]
 
-print(f"DEBUG: ext modules = {ext_modules}")
+# print(f"DEBUG: ext modules = {ext_modules}")
 
 setup(
     name='fast_rcnn',
