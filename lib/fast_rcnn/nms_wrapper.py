@@ -6,7 +6,10 @@
 # ----------------------------------------------------------
 
 from fast_rcnn.config import cfg
-from nms.gpu_nms import gpu_nms
+try:
+    from nms.gpu_nms import gpu_nms
+except ImportError:
+    cfg.USE_GPU_NMS = False
 from nms.cpu_nms import cpu_nms, cpu_soft_nms
 import numpy as np
 
