@@ -94,10 +94,10 @@ def get_detections_from_im(net, im_file, image_id, ziphelper, data_root, conf_th
         'image_h': np.size(im, 0),
         'image_w': np.size(im, 1),
         'num_boxes': len(keep_boxes),
-        'boxes': base64.b64encode(cls_boxes[keep_boxes]),
-        'classes': base64.b64encode(scores[keep_boxes]),
-        'attrs': base64.b64encode(attr_scores[keep_boxes]),
-        'features': base64.b64encode(pool5[keep_boxes])
+        'boxes': base64.b64encode(cls_boxes[keep_boxes]).decode('ascii'),
+        'classes': base64.b64encode(scores[keep_boxes]).decode('ascii'),
+        'attrs': base64.b64encode(attr_scores[keep_boxes]).decode('ascii'),
+        'features': base64.b64encode(pool5[keep_boxes]).decode('ascii')
     }
 
 
@@ -167,7 +167,7 @@ def generate_tsv(gpu_id, prototxt, weights, image_ids, data_root, outfolder):
         for im_file, image_id in image_ids:
             if int(image_id) in missing:
                 _t['misc'].tic()
-                json_file = "{:08d}.json".format(image_id)
+                json_file = f"{image_id:08d}.json"
                 with open(os.path.join(outfolder, json_file), 'w') as f:
                     json.dump(get_detections_from_im(net, im_file, image_id, ziphelper, data_root), f)
                 _t['misc'].toc()
